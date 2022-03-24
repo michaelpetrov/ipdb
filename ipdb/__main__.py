@@ -272,12 +272,13 @@ def main():
             pass
 
     if sys.version_info >= (3, 7):
-        opts, args = getopt.getopt(sys.argv[1:], 'mhc:', ['help', 'command='])
+        opts, args = getopt.getopt(sys.argv[1:], 'mhc:', ['help', 'command=', "no-restart"])
     else:
-        opts, args = getopt.getopt(sys.argv[1:], 'hc:', ['help', 'command='])
+        opts, args = getopt.getopt(sys.argv[1:], 'hc:', ['help', 'command=', "no-restart"])
 
     commands = []
     run_as_module = False
+    skip_restart = False
     for opt, optarg in opts:
         if opt in ['-h', '--help']:
             print(_usage)
@@ -286,6 +287,8 @@ def main():
             commands.append(optarg)
         elif opt in ['-m']:
             run_as_module = True
+        elif opt in ["--no-restart"]:
+            skip_restart = True
 
     if not args:
         print(_usage)
@@ -334,11 +337,16 @@ def main():
         except:
             traceback.print_exc()
             print("Uncaught exception. Entering post mortem debugging")
-            print("Running 'cont' or 'step' will restart the program")
+            if not skip_restart:
+                print("Running 'cont' or 'step' will restart the program")
             t = sys.exc_info()[2]
             pdb.interaction(None, t)
-            print("Post mortem debugger finished. The " + mainpyfile +
-                  " will be restarted")
+
+            if skip_restart:
+                break
+            else:
+                print("Post mortem debugger finished. The " + mainpyfile +
+                      " will be restarted")
 
 
 if __name__ == '__main__':
