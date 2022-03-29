@@ -7,6 +7,7 @@
 from __future__ import print_function
 import os
 import sys
+import warnings
 
 from decorator import contextmanager
 
@@ -21,8 +22,11 @@ try:
 except:
     import ConfigParser as configparser
 
+warnings.filterwarnings("ignore", category=RuntimeWarning, message="'ipdb.__main__' found in sys.modules after import of package 'ipdb'")
 
 def _get_debugger_cls():
+    
+
     shell = get_ipython()
     if shell is None:
         # Not inside IPython
@@ -308,7 +312,10 @@ def main():
                 pdb._runscript(mainpyfile)
             if pdb._user_requested_quit:
                 break
-            print("The program finished and will be restarted")
+            if skip_restart:
+                break
+            else:
+                print("The program finished and will be restarted")
         except Restart:
             print("Restarting", mainpyfile, "with arguments:")
             print("\t" + " ".join(sys.argv[1:]))
